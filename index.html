@@ -6,7 +6,7 @@
   <title>YodlDocs — YodlYodl</title>
   <link rel="icon" href="./yodlyodl.png" />
 
-  <!-- jsPDF + html2canvas for PDF export -->
+  <!-- html2canvas + jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -14,74 +14,86 @@
     :root{
       --bg: #000000;
       --fg: #ffdd33; /* dark yellow */
-      --muted: #111;
+      --muted: #111111;
       --accent: #ffdd33;
-      --border: 2px solid var(--accent);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      --panel-border: 2px solid var(--accent);
+      --radius: 8px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, Helvetica;
     }
+
     html,body{height:100%;}
     body{
       margin:0; background:var(--bg); color:var(--fg); display:flex; height:100vh; overflow:hidden;
     }
 
-    /* Sidebar */
-    #sidebar{
-      width:260px; min-width:200px; max-width:320px; border-right:var(--border); padding:18px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;
+    /* small fixed logo in top-left (style A) */
+    .site-logo{
+      position:fixed; left:18px; top:14px; width:72px; height:72px; z-index:1200; border-radius:8px; object-fit:contain;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     }
 
-    header.brand{
-      display:flex; align-items:center; gap:10px; margin-bottom:6px;
+    /* layout */
+    #sidebar{
+      width:260px; min-width:200px; max-width:320px; border-right:var(--panel-border); padding:22px 18px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;
     }
-    header.brand img{ width:34px; height:34px; object-fit:contain; border-radius:6px; }
-    header.brand h1{ font-size:18px; margin:0; letter-spacing:0.6px; }
+
+    header.brand{ display:flex; align-items:center; gap:10px; }
+    header.brand h1{ font-size:18px; margin:0; }
+    header.brand .sub{ font-size:12px; color:#e6d87a; opacity:0.95; }
 
     button.primary{
-      background:transparent; color:var(--fg); border:1px solid var(--fg); padding:8px 10px; cursor:pointer; border-radius:6px; font-weight:600;
+      background:transparent; color:var(--fg); border:1px solid var(--fg); padding:8px 12px; cursor:pointer; border-radius:6px; font-weight:600;
     }
 
     #docList{ overflow:auto; padding-right:6px; display:flex; flex-direction:column; gap:8px; }
     .docItem{ display:flex; gap:8px; align-items:center; padding:8px; border:1px solid transparent; border-radius:6px; cursor:pointer; }
     .docItem:hover{ background:var(--muted); border-color:var(--accent); }
+    .docItem.active{ background:rgba(255,221,51,0.06); border-color:var(--accent); }
 
-    .docItem img.icon{ width:28px; height:28px; border-radius:4px; }
+    .docItem img.icon{ width:32px; height:32px; border-radius:6px; }
     .docItem .meta{ display:flex; flex-direction:column; }
     .docItem .meta .title{ font-weight:700; color:var(--fg); }
-    .docItem .meta .sub{ font-size:12px; color:#e6d87a; opacity:0.8; }
+    .docItem .meta .sub{ font-size:12px; color:#e6d87a; opacity:0.75; }
 
-    /* Main editor area */
-    #main{ flex:1; display:flex; flex-direction:column; padding:18px; box-sizing:border-box; gap:12px; }
+    /* main area */
+    #main{ flex:1; display:flex; flex-direction:column; padding:22px; box-sizing:border-box; gap:10px; }
+    .topbar{ display:flex; align-items:center; gap:12px; }
 
-    .topbar{ display:flex; align-items:center; gap:10px; }
-    .topbar .controls{ margin-left:auto; display:flex; gap:8px; }
+    .toolbar{ display:flex; gap:8px; padding:8px; border-radius:6px; }
+    .toolbar button{ background:transparent; border:1px solid rgba(255,221,51,0.12); color:var(--fg); padding:8px 10px; border-radius:6px; cursor:pointer; }
 
-    /* Toolbar */
-    .toolbar{ display:flex; gap:6px; padding:8px; border-radius:6px; border:1px solid transparent; }
-    .toolbar button{ background:transparent; border:1px solid rgba(255,221,51,0.14); color:var(--fg); padding:8px; border-radius:6px; cursor:pointer; }
+    .controls{ margin-left:auto; display:flex; gap:8px; }
+    .controls .danger{ border-color:#ff6666; color:#ff6666; }
 
-    #docTitle{ font-size:20px; font-weight:800; margin:6px 0; outline:none; }
+    #docTitle{ font-size:22px; font-weight:800; margin:6px 0; outline:none; }
     #docTitle[contenteditable="true"]{ border-bottom:1px dashed rgba(255,221,51,0.12); padding-bottom:4px; }
 
     #editorWrap{ flex:1; display:flex; flex-direction:column; gap:8px; }
     #editor{
-      background:var(--bg); color:var(--fg); border:var(--border); padding:18px; border-radius:6px; height:100%; overflow:auto; caret-color:var(--fg);
+      background:var(--bg); color:var(--fg); border:var(--panel-border); padding:18px; border-radius:var(--radius); height:100%; overflow:auto; caret-color:var(--fg);
     }
-    #editor:focus{ box-shadow:0 0 0 4px rgba(255,221,51,0.04); }
+    #editor:focus{ box-shadow:0 0 0 6px rgba(255,221,51,0.04); }
 
     .mutedNote{ color:#e6d87a; opacity:0.8; font-size:13px; }
 
-    /* small responsive */
-    @media (max-width:800px){ #sidebar{ display:none; } }
+    /* Toast */
+    #toast{ position:fixed; right:18px; bottom:18px; background:rgba(0,0,0,0.8); color:var(--fg); border:1px solid rgba(255,221,51,0.12); padding:10px 14px; border-radius:8px; display:none; z-index:2000; }
+
+    /* responsive */
+    @media (max-width:900px){ #sidebar{ display:none; } .site-logo{ left:12px; top:8px; width:56px; height:56px; } .toolbar{ flex-wrap:wrap; } }
 
   </style>
 </head>
 <body>
 
+  <!-- Small fixed logo; expects ./yodlyodl.png to be uploaded alongside index.html on GitHub Pages -->
+  <img src="./yodlyodl.png" alt="YodlYodl logo" class="site-logo" onerror="this.style.display='none'" />
+
   <div id="sidebar">
     <div class="brand">
-      <img src="./yodlyodl.png" alt="YodlYodl logo">
       <div>
         <h1>YodlYodl</h1>
-        <div style="font-size:12px;color:#e6d87a;">YodlDocs</div>
+        <div class="sub">YodlDocs</div>
       </div>
     </div>
 
@@ -110,7 +122,7 @@
       <div class="controls">
         <button id="renameBtn" class="primary">Rename</button>
         <button id="exportBtn" class="primary">Export PDF</button>
-        <button id="deleteBtn" class="primary" style="border-color:#ff6666;color:#ff6666;">Delete</button>
+        <button id="deleteBtn" class="primary danger">Delete</button>
       </div>
     </div>
 
@@ -121,27 +133,30 @@
 
     <div id="editorWrap">
       <div id="editor" contenteditable="true" spellcheck="true">
-        <p>Start writing your document...</p>
+        <h2>Welcome to YodlDocs</h2>
+        <p>Edit this document or create a new one.</p>
       </div>
     </div>
   </div>
 
+  <div id="toast"></div>
+
 <script>
-// -------------------- Basic data model & storage --------------------
+// -------------------- Data model & storage --------------------
 const STORAGE_KEY = 'yodlyodl_docs_v1';
 let docs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 let currentId = null;
 
-function saveAll(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
-}
-
+function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
 function uid(){ return 'doc_' + Date.now() + '_' + Math.floor(Math.random()*9999); }
 
-// -------------------- UI helpers --------------------
+// -------------------- UI elements --------------------
 const docListEl = document.getElementById('docList');
 const editor = document.getElementById('editor');
 const docTitleEl = document.getElementById('docTitle');
+const toastEl = document.getElementById('toast');
+
+function showToast(msg, ms=2000){ toastEl.innerText = msg; toastEl.style.display = 'block'; setTimeout(()=>{ toastEl.style.display='none'; }, ms); }
 
 function renderDocList(){
   docListEl.innerHTML = '';
@@ -150,6 +165,7 @@ function renderDocList(){
   keys.forEach(id=>{
     const d = docs[id];
     const row = document.createElement('div'); row.className='docItem';
+    if(id===currentId) row.classList.add('active');
     row.onclick = ()=> openDoc(id);
 
     const img = document.createElement('img'); img.className='icon'; img.src='./yodlyodl.png'; img.onerror = ()=>{ img.style.display='none'; };
@@ -174,42 +190,35 @@ function openDoc(id){
   docTitleEl.innerText = docs[id].title;
   editor.innerHTML = docs[id].content;
   editor.focus();
-  // visual selection highlight in sidebar
-  Array.from(document.querySelectorAll('.docItem')).forEach(el=> el.style.outline='none');
+  renderDocList();
 }
 
 function deleteCurrent(){
-  if(!currentId) return alert('No document open');
+  if(!currentId) return showToast('No document open');
   if(!confirm('Delete this document? This cannot be undone.')) return;
-  delete docs[currentId]; saveAll(); currentId=null; renderDocList(); editor.innerHTML=''; docTitleEl.innerText='Untitled';
+  delete docs[currentId]; saveAll(); currentId=null; renderDocList(); editor.innerHTML=''; docTitleEl.innerText='Untitled'; showToast('Deleted');
 }
 
 function renameCurrent(){
-  if(!currentId) return alert('Open a document first');
+  if(!currentId) return showToast('Open a document first');
   const newTitle = prompt('Rename document:', docs[currentId].title || 'Untitled');
   if(newTitle==null) return; // cancelled
   docs[currentId].title = newTitle.trim() || 'Untitled';
-  docs[currentId].updated = Date.now(); saveAll(); renderDocList(); openDoc(currentId);
+  docs[currentId].updated = Date.now(); saveAll(); renderDocList(); openDoc(currentId); showToast('Renamed');
 }
 
-// inline title edit saves on blur
+// Title inline save
 docTitleEl.addEventListener('blur', ()=>{
   if(!currentId) return;
   const newTitle = docTitleEl.innerText.trim() || 'Untitled';
-  docs[currentId].title = newTitle; docs[currentId].updated = Date.now(); saveAll(); renderDocList();
+  docs[currentId].title = newTitle; docs[currentId].updated = Date.now(); saveAll(); renderDocList(); showToast('Saved');
 });
 
-authorizeKeyboardShortcuts();
+docTitleEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); docTitleEl.blur(); } });
 
-// -------------------- Formatting commands --------------------
-function cmd(command){
-  document.execCommand(command, false, null);
-  editor.focus();
-}
-function formatBlock(tag){
-  document.execCommand('formatBlock', false, '<' + tag + '>');
-  editor.focus();
-}
+// -------------------- Formatting --------------------
+function cmd(command){ document.execCommand(command, false, null); editor.focus(); }
+function formatBlock(tag){ document.execCommand('formatBlock', false, '<' + tag + '>'); editor.focus(); }
 
 // -------------------- Autosave --------------------
 let autosaveTimer = null;
@@ -218,47 +227,47 @@ editor.addEventListener('input', ()=>{
   docs[currentId].content = editor.innerHTML;
   docs[currentId].updated = Date.now();
   if(autosaveTimer) clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(()=>{ saveAll(); renderDocList(); }, 500);
+  autosaveTimer = setTimeout(()=>{ saveAll(); renderDocList(); showToast('Saved'); }, 700);
 });
 
-// Save title changes as well when Enter pressed in title
-docTitleEl.addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){ e.preventDefault(); docTitleEl.blur(); }
-});
-
-// -------------------- Export PDF (html2canvas -> jsPDF) --------------------
+// -------------------- Export to PDF (styled) --------------------
 async function exportPDF(){
-  if(!currentId) return alert('Open a document first');
-  const wrap = document.createElement('div');
-  // clone editor to a clean container for rendering
-  wrap.style.padding='24px'; wrap.style.background='#000'; wrap.style.color='#ffdd33';
-  wrap.style.width='800px';
+  if(!currentId) return showToast('Open a document first');
+  showToast('Rendering PDF...');
+  // clone editor into a clean container so UI chrome doesn't appear
   const clone = editor.cloneNode(true);
-  clone.style.width='752px'; clone.style.boxSizing='border-box';
-  wrap.appendChild(clone);
-
-  document.body.appendChild(wrap);
-  const canvas = await html2canvas(wrap, { backgroundColor: '#000', scale: 2 });
-  const imgData = canvas.toDataURL('image/png');
-  document.body.removeChild(wrap);
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ unit: 'px', format: [canvas.width, canvas.height] });
-  pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-  pdf.save((docs[currentId].title || 'document') + '.pdf');
+  const wrapper = document.createElement('div');
+  wrapper.style.padding='24px';
+  wrapper.style.background='white'; // use white background for PDFs
+  wrapper.style.color='#000';
+  wrapper.style.width='800px';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+  try{
+    const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit:'px', format:[canvas.width, canvas.height] });
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save((docs[currentId].title || 'document') + '.pdf');
+    showToast('PDF ready');
+  }catch(e){
+    console.error(e);
+    showToast('PDF error');
+  }finally{
+    document.body.removeChild(wrapper);
+  }
 }
 
 // -------------------- Keyboard shortcuts --------------------
-function authorizeKeyboardShortcuts(){
-  document.addEventListener('keydown', (e)=>{
-    if((e.ctrlKey || e.metaKey) && !e.shiftKey){
-      if(e.key.toLowerCase() === 'b'){ e.preventDefault(); cmd('bold'); }
-      if(e.key.toLowerCase() === 'i'){ e.preventDefault(); cmd('italic'); }
-      if(e.key.toLowerCase() === 'u'){ e.preventDefault(); cmd('underline'); }
-      if(e.key.toLowerCase() === 's'){ e.preventDefault(); saveAll(); alert('Saved locally'); }
-    }
-  });
-}
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && !e.shiftKey){
+    if(e.key.toLowerCase() === 'b'){ e.preventDefault(); cmd('bold'); }
+    if(e.key.toLowerCase() === 'i'){ e.preventDefault(); cmd('italic'); }
+    if(e.key.toLowerCase() === 'u'){ e.preventDefault(); cmd('underline'); }
+    if(e.key.toLowerCase() === 's'){ e.preventDefault(); saveAll(); showToast('Saved'); }
+  }
+});
 
 // -------------------- Wire buttons --------------------
 document.getElementById('newBtn').addEventListener('click', newDoc);
@@ -268,14 +277,11 @@ document.getElementById('deleteBtn').addEventListener('click', deleteCurrent);
 
 // -------------------- Init --------------------
 (function init(){
-  // if no docs exist, create a starter
   if(Object.keys(docs).length===0){ const id=uid(); docs[id] = { title:'Welcome', content:'<h2>Welcome to YodlDocs</h2><p>Edit this document or create a new one.</p>', created:Date.now(), updated:Date.now() }; saveAll(); }
   renderDocList();
-  // open the most recent
   const recent = Object.keys(docs).sort((a,b)=> docs[b].updated - docs[a].updated )[0];
   if(recent) openDoc(recent);
 })();
-
 </script>
 </body>
 </html>
